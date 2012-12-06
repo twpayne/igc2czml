@@ -15,7 +15,9 @@ HFPLT_RECORD_RE = re.compile(r'^HFPLT[^:]*:(.*)$')
 
 def main(argv):
     option_parser = OptionParser()
+    option_parser.add_option('-i', '--indent', type=int)
     option_parser.add_option('-o', '--output', metavar='FILENAME')
+    option_parser.add_option('-s', '--sort-keys', action='store_true')
     options, args = option_parser.parse_args(argv[1:])
     czml = []
     for arg in args:
@@ -55,10 +57,10 @@ def main(argv):
             },
         })
     if options.output in (None, '-'):
-        json.dump(czml, sys.stdout)
+        json.dump(czml, sys.stdout, indent=options.indent, sort_keys=options.sort_keys)
     else:
         with open(options.output, 'w') as fp:
-            json.dump(czml, fp)
+            json.dump(czml, fp, indent=options.indent, sort_keys=options.sort_keys)
 
 
 if __name__ == '__main__':
