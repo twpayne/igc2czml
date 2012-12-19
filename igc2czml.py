@@ -51,6 +51,7 @@ def main(argv):
                 continue
         czml.append({
             'id': id,
+            'availability': '%s/%s' % (epoch.strftime('%Y-%m-%dT%H:%M:%SZ'), dt.strftime('%Y-%m-%dT%H:%M:%SZ')),
             'position': {
                 'epoch': epoch.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'cartographicDegrees': cartographicDegrees,
