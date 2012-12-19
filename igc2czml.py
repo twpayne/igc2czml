@@ -15,10 +15,21 @@ HFPLT_RECORD_RE = re.compile(r'^HFPLT[^:]*:(.*)$')
 
 def main(argv):
     option_parser = OptionParser()
+    option_parser.add_option('-g', '--geometry')
     option_parser.add_option('-i', '--indent', type=int)
     option_parser.add_option('-o', '--output', metavar='FILENAME')
     option_parser.add_option('-s', '--sort-keys', action='store_true')
     options, args = option_parser.parse_args(argv[1:])
+    if options.geometry:
+        geometry = json.load(options.geometry)
+    else:
+        geometry = {
+            'point': {
+                'color': {
+                    'rgba': [255, 0, 0, 255]
+                }
+            }
+        }
     czml = []
     for arg in args:
         cartographicDegrees = []
@@ -49,14 +60,17 @@ def main(argv):
             if m:
                 id = m.group(1).strip()
                 continue
-        czml.append({
+        o = {
             'id': id,
             'availability': '%s/%s' % (epoch.strftime('%Y-%m-%dT%H:%M:%SZ'), dt.strftime('%Y-%m-%dT%H:%M:%SZ')),
             'position': {
                 'epoch': epoch.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'cartographicDegrees': cartographicDegrees,
             },
-        })
+        }
+        o.update(geometry)
+        czml.append(o)
+
     if options.output in (None, '-'):
         json.dump(czml, sys.stdout, indent=options.indent, sort_keys=options.sort_keys)
     else:
