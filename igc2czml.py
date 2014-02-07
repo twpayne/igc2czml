@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
+from cStringIO import StringIO
 import datetime
 import json
 from optparse import OptionParser
 import os.path
 import re
 import sys
+from zipfile import ZipFile
 
 
 B_RECORD_RE = re.compile(r'^B(\d{2})(\d{2})(\d{2})(\d{2})(\d{5})([NS])(\d{3})(\d{5})([EW])([AV])(\d{5})(\d{5})')
 HFDTE_RECORD_RE = re.compile(r'^HFDTE(\d{2})(\d{2})(\d{2})')
 HFPLT_RECORD_RE = re.compile(r'^HFPLT[^:]*:(.*)$')
+
 
 def igc2czml(id, f, geometry=None):
     cartographicDegrees = []
@@ -53,6 +56,14 @@ def igc2czml(id, f, geometry=None):
     return result
 
 
+def zip2czml(arg, geometry=None):
+    result = []
+    with ZipFile(arg) as zipfile:
+        for zipinfo in zipfile.infolist():
+            result.append(igc2czml(zipinfo.filename, zipfile.open(zipinfo), geometry))
+    return result
+
+
 def main(argv):
     option_parser = OptionParser()
     option_parser.add_option('-g', '--geometry')
@@ -72,7 +83,12 @@ def main(argv):
         }
     czml = []
     for arg in args:
-        czml.append(igc2czml(os.path.basename(arg), open(arg), geometry=geometry))
+        if arg.lower().endswith('.igc'):
+            czml.append(igc2czml(os.path.basename(arg), open(arg), geometry=geometry))
+        elif arg.lower().endswith('.zip'):
+            czml.extend(zip2czml(open(arg)))
+        else:
+            assert RuntimeError  # FIXME
 
     if options.output in (None, '-'):
         json.dump(czml, sys.stdout, indent=options.indent, sort_keys=options.sort_keys)
