@@ -78,7 +78,8 @@ def main(argv):
             'point': {
                 'color': {
                     'rgba': [255, 0, 0, 255]
-                }
+                },
+                'pixelSize': 8,
             }
         }
     czml = []
